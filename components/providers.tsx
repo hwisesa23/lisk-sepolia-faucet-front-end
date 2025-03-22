@@ -1,39 +1,31 @@
 "use client"
 
-import type React from "react"
+import { ReactNode } from 'react';
+import { ThemeProvider } from '@/components/theme-provider';
+import { WagmiProvider } from 'wagmi';
+import { config } from '@/lib/wagmi.config';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { WagmiConfig, createConfig, configureChains } from "wagmi"
-import { publicProvider } from "wagmi/providers/public"
-import { sepolia } from "wagmi/chains"
-import { injected, metaMask, walletConnect } from "wagmi/connectors"
+// Create a client for React Query
+const queryClient = new QueryClient();
 
-// Configure chains and providers
-const { chains, publicClient, webSocketPublicClient } = configureChains([sepolia], [publicProvider()])
+interface ProvidersProps {
+  children: ReactNode;
+}
 
-// Create wagmi config
-const config = createConfig({
-  autoConnect: true,
-  connectors: [
-    metaMask({ chains }),
-    walletConnect({
-      chains,
-      options: {
-        projectId: "YOUR_PROJECT_ID", // Replace with your WalletConnect project ID
-      },
-    }),
-    injected({
-      chains,
-      options: {
-        name: "Injected",
-        shimDisconnect: true,
-      },
-    }),
-  ],
-  publicClient,
-  webSocketPublicClient,
-})
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  return <WagmiConfig config={config}>{children}</WagmiConfig>
+export function Providers({ children }: ProvidersProps) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+        >
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
 }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { ThemeProvider } from '@/components/theme-provider'
+import { Providers } from '@/components/providers'
 
 export const metadata: Metadata = {
   title: 'Lisk Sepolia Faucet',
@@ -15,13 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-        >
-          {children}
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
