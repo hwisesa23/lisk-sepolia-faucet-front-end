@@ -1,49 +1,41 @@
 import { useState } from "react";
-import { FaucetAddress, FaucetABI } from "../app/abis/faucet";
-import { useWriteContract, useAccount } from "wagmi";
+import { useAccount } from "wagmi";
 
-export function useRequestFunds() {
+const useFaucet = () => {
+  const [state, setState] = useState<"error" | "loading" | "success" | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
   const { address } = useAccount();
 
-  const { 
-    writeContract, 
-    isPending,
-    isError 
-  } = useWriteContract();
+  const data = {
+    userAddress: address,
+  };
+
+  interface FaucetResponse {
+    txHash?: string;
+    errorMessage?: string;
+  }
 
   const requestFunds = async () => {
+    setState("loading");
     try {
-      setErrorMessage(null);
-      setIsSuccess(false);
-      
-      await writeContract({
-        address: FaucetAddress,
-        abi: FaucetABI,
-        functionName: "requestFunds",
-      });
-      
-      // If we get here without an error, consider it a success
-      setIsSuccess(true);
-      setErrorMessage("Request submitted. 0.01 ETH will be sent to your wallet.");
-    } catch (error: any) {
-      setIsSuccess(false);
-      if (error.message.includes("execution reverted")) {
-        const match = error.message.match(/execution reverted: (.*)/);
-        setErrorMessage(match ? match[1] : "Transaction failed");
-      } else {
-        setErrorMessage(error.message || "Failed to request funds");
-      }
+      const response: FaucetResponse = await fetch(`http://localhost:3001/faucet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).then(res => res.json());
+
+      setState(response.txHash ? "success" : "error");
+      setErrorMessage(response.errorMessage ?? "Something went wrong");
+
+      return await response;
+    } catch (err: unknown) {
+      console.log(err);
+      setState("error");
+      setErrorMessage(err instanceof Error ? err.message : "An unknown error occurred");
     }
   };
 
-  return { 
-    requestFunds, 
-    isPending, 
-    isError, 
-    errorMessage, 
-    isSuccess,
-    isConnected: !!address
-  };
-}
+  return { requestFunds, state, errorMessage };
+};
+
+export default useFaucet;

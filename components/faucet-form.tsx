@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Loader2, Wallet } from "lucide-react"
-import { useRequestFunds } from "@/hooks/use-faucet";
+import useFaucet from "@/hooks/use-faucet";
 
 // Add ethereum window interface
 declare global {
@@ -22,11 +22,10 @@ export function FaucetForm() {
   const [isConnected, setIsConnected] = useState(false)
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
-  const { requestFunds, isPending, isError, errorMessage, isSuccess } = useRequestFunds();
+  const { requestFunds, state, errorMessage } = useFaucet();
 
   // Check if wallet is already connected on component mount
   useEffect(() => {
-    console.log(errorMessage?.length)
     checkIfWalletIsConnected()
 
     // Listen for account changes
@@ -112,10 +111,10 @@ export function FaucetForm() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isPending}
+              disabled={state === "loading"}
               className="w-full bg-gray-800 hover:bg-gray-700 text-white border-0 p-4"
             >
-              {isPending ? (
+              {state === "loading" ? (
                 <div className="flex items-center justify-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Requesting tokens...
@@ -153,12 +152,12 @@ export function FaucetForm() {
       {errorMessage && (
         <div
           className={`rounded-md p-4 mt-4 text-center ${
-            isSuccess
+            state === "success"
               ? "bg-gray-900 border border-gray-700"
               : "bg-red-950/30 border border-red-900/50"
           }`}
         >
-          <p className={isSuccess ? "text-gray-200" : "text-red-400"}>{errorMessage}</p>
+          <p className={state === "success" ? "text-gray-200" : "text-red-400"}>{errorMessage}</p>
         </div>
       )}
     </div>
