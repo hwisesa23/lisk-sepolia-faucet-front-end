@@ -81,7 +81,6 @@ export function FaucetForm() {
       console.error("Error connecting wallet:", error)
     } finally {
       setIsConnecting(false)
-      setRequestStatus("idle")
     }
   }
 

@@ -18,7 +18,7 @@ const useFaucet = () => {
   const requestFunds = async () => {
     setState("loading");
     try {
-      const response: FaucetResponse = await fetch(`http://localhost:3001/faucet`, {
+      const response: FaucetResponse = await fetch(`https://danantiri.stefanusdeo.site/faucet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
